@@ -1,14 +1,40 @@
 import { StatusBar } from "expo-status-bar";
-import React, { useState } from "react";
-import { StyleSheet, View, KeyboardAvoidingView } from "react-native";
+import React, { useLayoutEffect, useState } from "react";
+import { StyleSheet, View, KeyboardAvoidingView, Alert } from "react-native";
 import { Button, Input, Text } from "react-native-elements";
+import { auth } from "../firebase";
 
 const RegisterScreen = ({ navigation }) => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [imageUrl, setImageUrl] = useState("");
-  const register = () => {};
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerBackTitle: "Login",
+    });
+  }, [navigation]);
+  const register = () => {
+    auth
+      .createUserWithEmailAndPassword(email, password)
+      .then((authUser) => {
+        authUser.user.updateProfile({
+          displayName: name,
+          photoURL:
+            imageUrl ||
+            "https://cencup.com/wp-content/uploads/2019/07/avatar-placeholder.png",
+        });
+      })
+      .catch((err) =>
+        Alert.alert(
+          "Error",
+          err.message,
+          [{ text: "OK", onPress: () => console.log("OK Pressed") }],
+          { cancelable: false }
+        )
+      );
+  };
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
